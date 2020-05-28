@@ -1,0 +1,25 @@
+table, th, td{
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+th, td{
+    width: 50px;
+    height: 50px;
+    text-align: center;
+}
+
+.no-border-up>th{
+    border-top: 1px solid white !important;
+    border-left: 1px solid white !important;
+    border-right: 1px solid white !important;
+    background-color: white !important;
+}
+
+.no-border-left{
+    background-color: white !important;
+    border-top: 1px solid white !important;
+    border-left: 1px solid white !important;
+    border-bottom: 1px solid white !important;
+}
+
