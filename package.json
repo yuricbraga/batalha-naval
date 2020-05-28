@@ -1,0 +1,25 @@
+{
+  "name": "batalha-naval",
+  "version": "1.0.0",
+  "description": "Parte 1 do trabalho prático da disciplina Redes de Computadores I",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuricbraga/batalha-naval.git"
+  },
+  "author": "Yuri Braga",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yuricbraga/batalha-naval/issues"
+  },
+  "homepage": "https://github.com/yuricbraga/batalha-naval#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.4",
+    "socket.io": "^2.3.0"
+  }
+}
