@@ -7,7 +7,9 @@ const socket = io("192.168.0.12:9000")
 class App extends React.Component {
   state = {
     sessionId: "",
-    myTurn: false
+    myTurn: false,
+    canPlace: false,
+    orientation: true
   }
 
   componentDidMount() {
@@ -31,11 +33,18 @@ class App extends React.Component {
     e.target.style.backgroundColor = "red";
   }
 
+  placeShip = (e) => {
+    this.setState({canPlace: !this.state.canPlace});
+  }
+
   render() {
     return (
       <div>
         <h2>Meu tabuleiro</h2>
-        <Tabuleiro cols={10} lines={10} socket={socket} sessionId={this.state.sessionId}></Tabuleiro>
+        <Tabuleiro cols={10} lines={10} operation={this.placeShip} orientation={this.state.orientation} canPlace={this.state.canPlace} socket={socket} sessionId={this.state.sessionId}></Tabuleiro>
+        <br/>
+        <button onClick={(e) => {this.setState({orientation: !this.state.orientation})}}>Rotacionar</button>
+        <br/>
         <h2 style={{visibility: this.state.myTurn ? "visible" : "hidden"}}>Tabuleiro adversário</h2>
         <Tabuleiro cols={10} lines={10} operation={this.sendBomb} visible={this.state.myTurn}></Tabuleiro>
       </div>

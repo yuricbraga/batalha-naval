@@ -4,6 +4,7 @@ import "./Tabuleiro.css";
 class Tabuleiro extends React.Component {
   state = {
     colorMatrix: null,
+    ships: [5, 4, 3, 2],
   };
 
   componentDidMount() {
@@ -41,6 +42,63 @@ class Tabuleiro extends React.Component {
     return response;
   };
 
+  setShip = (event, line, col, color) => {
+    let auxMatrix = this.state.colorMatrix;
+
+    let checkCollision = () => {
+      let response = false;
+
+      for (let i = 0; i < this.state.ships[0]; i++) {
+        if (this.props.orientation) {
+          if (this.state.colorMatrix[line + i][col] !== "teal") {
+            response = true;
+          }
+        } else {
+          if (this.state.colorMatrix[line][col + i] !== "teal") {
+            response = true;
+          }
+        }
+      }
+
+      return response;
+    };
+
+    if (
+      this.props.orientation &&
+      line > this.props.lines - this.state.ships[0]
+    ) {
+      line = this.props.lines - this.state.ships[0];
+    }
+
+    if (
+      this.props.orientation === false &&
+      col > this.props.cols - this.state.ships[0]
+    ) {
+      col = this.props.cols - this.state.ships[0];
+    }
+
+    if (checkCollision() === false) {
+      for (let i = 0; i < this.state.ships[0]; i++) {
+        if (this.props.orientation) {
+          auxMatrix[line + i][col] = color;
+        } else {
+          auxMatrix[line][col + i] = color;
+        }
+      }
+    }
+
+    this.setState({ colorMatrix: auxMatrix });
+    if (this.props.canPlace && event.type === "mouseleave") {
+      this.props.operation(null);
+
+      let auxShips = this.state.ships;
+
+      auxShips.shift();
+
+      this.setState({ ships: auxShips });
+    }
+  };
+
   linesGenerate = (lines) => {
     const linesGenerateAux = (lines, position) => {
       let response = [];
@@ -51,6 +109,15 @@ class Tabuleiro extends React.Component {
             key={i}
             id={position + String.fromCharCode(65 + i)}
             onClick={this.props.operation}
+            onMouseEnter={(e) => this.setShip(e, position, i, "blue")}
+            onMouseLeave={(e) =>
+              this.setShip(
+                e,
+                position,
+                i,
+                this.props.canPlace ? "blue" : "teal"
+              )
+            }
             style={{
               backgroundColor:
                 this.state.colorMatrix !== null
@@ -80,7 +147,14 @@ class Tabuleiro extends React.Component {
 
   render() {
     return (
-      <div style={{visibility: this.props.visible || this.props.visible === undefined ? "visible" : "hidden"}}>
+      <div
+        style={{
+          visibility:
+            this.props.visible || this.props.visible === undefined
+              ? "visible"
+              : "hidden",
+        }}
+      >
         <table>
           <tbody>
             <tr className="no-border-up">
