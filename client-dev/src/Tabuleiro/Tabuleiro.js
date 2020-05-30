@@ -4,6 +4,7 @@ import "./Tabuleiro.css";
 class Tabuleiro extends React.Component {
   state = {
     colorMatrix: null,
+    colorMatrixCopy: null,
     ships: [5, 4, 3, 2],
   };
 
@@ -16,7 +17,10 @@ class Tabuleiro extends React.Component {
       }
     }
 
-    this.setState({ colorMatrix: auxMatrix });
+    this.setState({
+      colorMatrix: auxMatrix.map((x) => x.map((y) => y)),
+      colorMatrixCopy: auxMatrix.map((x) => x.map((y) => y)),
+    });
   }
 
   componentDidUpdate() {
@@ -42,60 +46,70 @@ class Tabuleiro extends React.Component {
     return response;
   };
 
+  checkCollision = (line, col) => {
+    let response = false;
+
+    if (this.props.orientation) {
+      for (let i = 0; i < this.state.ships[0]; i++)
+        if (this.state.colorMatrixCopy[line + i][col] !== "teal")
+          response = true;
+    } else {
+      for (let i = 0; i < this.state.ships[0]; i++)
+        if (this.state.colorMatrixCopy[line][col + i] !== "teal")
+          response = true;
+    }
+
+    return response;
+  };
+
   setShip = (event, line, col, color) => {
-    let auxMatrix = this.state.colorMatrix;
+    if (this.props.canPlace !== undefined && this.state.ships.length > 0) {
+      let auxMatrix = this.state.colorMatrixCopy.map((x) => x.map((y) => y));
 
-    let checkCollision = () => {
-      let response = false;
-
-      for (let i = 0; i < this.state.ships[0]; i++) {
-        if (this.props.orientation) {
-          if (this.state.colorMatrix[line + i][col] !== "teal") {
-            response = true;
-          }
-        } else {
-          if (this.state.colorMatrix[line][col + i] !== "teal") {
-            response = true;
-          }
-        }
+      if (
+        this.props.orientation &&
+        line > this.props.lines - this.state.ships[0]
+      ) {
+        line = this.props.lines - this.state.ships[0];
       }
 
-      return response;
-    };
-
-    if (
-      this.props.orientation &&
-      line > this.props.lines - this.state.ships[0]
-    ) {
-      line = this.props.lines - this.state.ships[0];
-    }
-
-    if (
-      this.props.orientation === false &&
-      col > this.props.cols - this.state.ships[0]
-    ) {
-      col = this.props.cols - this.state.ships[0];
-    }
-
-    if (checkCollision() === false) {
-      for (let i = 0; i < this.state.ships[0]; i++) {
-        if (this.props.orientation) {
-          auxMatrix[line + i][col] = color;
-        } else {
-          auxMatrix[line][col + i] = color;
-        }
+      if (
+        this.props.orientation === false &&
+        col > this.props.cols - this.state.ships[0]
+      ) {
+        col = this.props.cols - this.state.ships[0];
       }
+
+      if (this.checkCollision(line, col) === false)
+        for (let i = 0; i < this.state.ships[0]; i++) {
+          if (this.props.orientation) {
+            auxMatrix[line + i][col] = color;
+          } else {
+            auxMatrix[line][col + i] = color;
+          }
+        }
+
+      this.setState({ colorMatrix: auxMatrix });
     }
+  };
 
-    this.setState({ colorMatrix: auxMatrix });
-    if (this.props.canPlace && event.type === "mouseleave") {
-      this.props.operation(null);
+  repaint = (line, col) => {
+    if (this.props.canPlace !== undefined && this.state.ships.length > 0) {
+      if (this.props.canPlace && this.checkCollision(line, col) === false) {
+        this.setState({
+          colorMatrixCopy: this.state.colorMatrix.map((x) => x.map((y) => y)),
+        });
+        let shipsAux = this.state.ships.map((x) => x);
+        shipsAux.shift();
 
-      let auxShips = this.state.ships;
+        this.setState({ ships: shipsAux });
 
-      auxShips.shift();
+        this.props.operation(null);
+      }
 
-      this.setState({ ships: auxShips });
+      this.setState({
+        colorMatrix: this.state.colorMatrixCopy.map((x) => x.map((y) => y)),
+      });
     }
   };
 
@@ -110,14 +124,7 @@ class Tabuleiro extends React.Component {
             id={position + String.fromCharCode(65 + i)}
             onClick={this.props.operation}
             onMouseEnter={(e) => this.setShip(e, position, i, "blue")}
-            onMouseLeave={(e) =>
-              this.setShip(
-                e,
-                position,
-                i,
-                this.props.canPlace ? "blue" : "teal"
-              )
-            }
+            onMouseLeave={(e) => this.repaint(position, i)}
             style={{
               backgroundColor:
                 this.state.colorMatrix !== null
